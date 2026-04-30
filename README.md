@@ -144,3 +144,8 @@ git branch -M main
 git remote add origin https://github.com/VOTRE-USERNAME/newsletter-spring-boot.git
 git push -u origin main
 ```
+
+⭐ Soutenir le projet
+
+Si ce projet t’aide :
+👉 laisse une étoile sur GitHub
