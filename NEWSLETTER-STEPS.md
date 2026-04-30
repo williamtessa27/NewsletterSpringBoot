@@ -27,3 +27,22 @@ Pour une formation plus structurée :
 - step-04-validation-erreurs
 - step-05-dto-mapping
 - step-06-security-jwt
+
+
+## Étape #6 — Spring Security + JWT
+
+Branche recommandée :
+
+```bash
+git checkout -b step-6-security-jwt
+```
+
+Ajouts principaux :
+
+- dépendance `spring-boot-starter-security`
+- dépendance `spring-boot-starter-oauth2-resource-server`
+- configuration stateless
+- endpoint `/api/auth/login`
+- génération de JWT
+- protection des routes `/api/tasks/**`
+- accès libre à `/h2-console/**` pour le développement local

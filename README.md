@@ -26,6 +26,8 @@ Construire une API REST complète étape par étape :
 - Spring Data JPA
 - Bean Validation
 - H2 Database
+- Spring Security
+- OAuth2 Resource Server JWT
 
 ## Structure
 
@@ -37,7 +39,8 @@ src/main/java/com/newsletter/springboot
 ├── model
 ├── dto
 ├── mapper
-└── exception
+├── exception
+└── config
 ```
 
 ## Lancer le projet
@@ -65,6 +68,50 @@ JDBC URL: jdbc:h2:mem:newsletterdb
 User: sa
 Password: laisser vide
 ```
+
+
+## Sécurité JWT
+
+Depuis l'étape #6, les routes `/api/tasks/**` sont protégées.
+
+Comptes de test :
+
+```text
+admin / admin123
+user  / user123
+```
+
+### Générer un token
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+```
+
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+Réponse :
+
+```json
+{
+  "tokenType": "Bearer",
+  "accessToken": "eyJ..."
+}
+```
+
+### Utiliser le token
+
+Ajoute ce header dans tes requêtes protégées :
+
+```http
+Authorization: Bearer VOTRE_TOKEN
+```
+
 
 ## Endpoints disponibles
 
@@ -134,6 +181,17 @@ DELETE /api/tasks/1
 - #9 : Dockerisation
 - #10 : Déploiement
 
+
+## Branche recommandée pour cette étape
+
+```bash
+git checkout -b step-6-security-jwt
+git add .
+git commit -m "Ajout de Spring Security et authentification JWT"
+git push -u origin step-6-security-jwt
+```
+
+
 ## Commandes Git recommandées
 
 ```bash
@@ -144,8 +202,3 @@ git branch -M main
 git remote add origin https://github.com/VOTRE-USERNAME/newsletter-spring-boot.git
 git push -u origin main
 ```
-
-⭐ Soutenir le projet
-
-Si ce projet t’aide :
-👉 laisse une étoile sur GitHub
