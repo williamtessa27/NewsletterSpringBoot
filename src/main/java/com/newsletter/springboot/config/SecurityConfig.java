@@ -24,81 +24,79 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+        @Value("${jwt.secret}")
+        private String jwtSecret;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**")
-                        .disable()
-                )
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.disable())
-                )
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/h2-console/**", "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tasks/**").authenticated()
-                        .requestMatchers("/api/tasks/**").authenticated()
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(Customizer.withDefaults())
-                );
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf
+                                                .ignoringRequestMatchers("/h2-console/**")
+                                                .disable())
+                                .headers(headers -> headers
+                                                .frameOptions(frame -> frame.disable()))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/", "/h2-console/**", "/api/auth/login",
+                                                                "/api/auth/refresh")
+                                                .permitAll()
 
-        return http.build();
-    }
+                                                .requestMatchers(HttpMethod.GET, "/api/tasks/**")
+                                                .hasAnyRole("USER", "ADMIN")
+                                                .requestMatchers(HttpMethod.POST, "/api/tasks/**").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/api/tasks/**").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/tasks/**").hasRole("ADMIN")
 
-    @Bean
-    public JwtEncoder jwtEncoder() {
-        SecretKeySpec secretKey = new SecretKeySpec(
-                jwtSecret.getBytes(StandardCharsets.UTF_8),
-                "HmacSHA256"
-        );
+                                                .anyRequest().authenticated())
+                                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
-        return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
-    }
+                return http.build();
+        }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKey = new SecretKeySpec(
-                jwtSecret.getBytes(StandardCharsets.UTF_8),
-                "HmacSHA256"
-        );
+        @Bean
+        public JwtEncoder jwtEncoder() {
+                SecretKeySpec secretKey = new SecretKeySpec(
+                                jwtSecret.getBytes(StandardCharsets.UTF_8),
+                                "HmacSHA256");
 
-        return NimbusJwtDecoder.withSecretKey(secretKey).build();
-    }
+                return new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
+        }
 
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        var admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin123"))
-                .roles("ADMIN")
-                .build();
+        @Bean
+        public JwtDecoder jwtDecoder() {
+                SecretKeySpec secretKey = new SecretKeySpec(
+                                jwtSecret.getBytes(StandardCharsets.UTF_8),
+                                "HmacSHA256");
 
-        var user = User.builder()
-                .username("user")
-                .password(passwordEncoder.encode("user123"))
-                .roles("USER")
-                .build();
+                return NimbusJwtDecoder.withSecretKey(secretKey).build();
+        }
 
-        return new InMemoryUserDetailsManager(admin, user);
-    }
+        @Bean
+        public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+                var admin = User.builder()
+                                .username("admin")
+                                .password(passwordEncoder.encode("admin123"))
+                                .roles("ADMIN")
+                                .build();
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+                var user = User.builder()
+                                .username("user")
+                                .password(passwordEncoder.encode("user123"))
+                                .roles("USER")
+                                .build();
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration
-    ) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
+                return new InMemoryUserDetailsManager(admin, user);
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public AuthenticationManager authenticationManager(
+                        AuthenticationConfiguration configuration) throws Exception {
+                return configuration.getAuthenticationManager();
+        }
 }

@@ -1,6 +1,9 @@
 package com.newsletter.springboot.dto;
 
 public record LoginResponse(
-        String token
+        String accessToken,
+        String refreshToken,
+        String tokenType,
+        long expiresIn
 ) {
 }
